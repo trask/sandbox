@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2011 the original author or authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.github.trask.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>1-SNAPSHOT</version>
+  </parent>
+
+  <groupId>com.github.trask.sandbox</groupId>
+  <artifactId>sandbox-parent</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Sandbox Parent Project</name>
+  <description>Sandbox Parent Project</description>
+  <url>https://github.com/trask/sandbox</url>
+
+  <modules>
+    <module>sandbox-aws</module>
+    <module>sandbox-class-loaders</module>
+    <module>sandbox-clock</module>
+    <module>sandbox-commandq</module>
+    <module>sandbox-executors</module>
+    <module>sandbox-http</module>
+    <module>sandbox-jetty</module>
+    <module>sandbox-mail</module>
+    <module>sandbox-messageq</module>
+    <module>sandbox-mongodb</module>
+    <!--
+      module below is commented out because the sauceconnect dependency is not under maven central
+      http://support.saucelabs.com/entries/20425567-sauce-connect-in-maven-repository
+    -->
+    <!--module>sandbox-saucelabs</module -->
+    <module>sandbox-ssh</module>
+    <module>sandbox-testutils</module>
+  </modules>
+
+  <scm>
+    <connection>scm:git:https://github.com/trask/sandbox.git</connection>
+    <developerConnection>scm:git:git@github.com:trask/sandbox.git</developerConnection>
+    <url>https://github.com/trask/sandbox</url>
+  </scm>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.3.2</version>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <!--
+          ensure that only methods available in jdk 5 can
+          be used even when compiling with a more recent jdk
+        -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>animal-sniffer-maven-plugin</artifactId>
+        <version>1.7</version>
+        <configuration>
+          <signature>
+            <groupId>org.codehaus.mojo.signature</groupId>
+            <artifactId>java15</artifactId>
+            <version>1.0</version>
+          </signature>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
