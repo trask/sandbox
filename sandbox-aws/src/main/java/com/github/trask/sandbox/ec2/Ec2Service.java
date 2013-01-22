@@ -15,12 +15,10 @@
  */
 package com.github.trask.sandbox.ec2;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,10 +27,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.StringUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PasswordFinder;
@@ -81,7 +75,11 @@ import com.amazonaws.services.identitymanagement.model.ListAccessKeysResult;
 import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
 import com.amazonaws.services.identitymanagement.model.PutUserPolicyRequest;
 import com.amazonaws.services.identitymanagement.model.User;
+import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
+import com.google.common.io.BaseEncoding;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -165,8 +163,7 @@ public class Ec2Service {
         if (!new File(privateKeyPath).exists()) {
             generateKey(privateKeyPath, keyName);
         }
-        Reader r = new BufferedReader(new StringReader(FileUtils
-                .readFileToString(new File(privateKeyPath))));
+        Reader r = Files.newReader(new File(privateKeyPath), Charsets.UTF_8);
         PEMReader pem = new PEMReader(r, new PasswordFinder() {
             public char[] getPassword() {
                 // this will get called if the private key is password protected
@@ -175,8 +172,8 @@ public class Ec2Service {
             }
         });
         java.security.KeyPair pair = (java.security.KeyPair) pem.readObject();
-        String publicKey = StringUtils.newStringIso8859_1(Base64
-                .encodeBase64(pair.getPublic().getEncoded()));
+        pem.close();
+        String publicKey = BaseEncoding.base64().encode(pair.getPublic().getEncoded());
         deleteKeyPairIfExists(keyName);
         ImportKeyPairRequest request = new ImportKeyPairRequest(keyName, publicKey);
         ec2.importKeyPair(request);
@@ -188,8 +185,7 @@ public class Ec2Service {
         deleteKeyPairIfExists(keyName);
         CreateKeyPairRequest request = new CreateKeyPairRequest(keyName);
         CreateKeyPairResult result = ec2.createKeyPair(request);
-        FileUtils.writeStringToFile(new File(privateKeyPath),
-                result.getKeyPair().getKeyMaterial());
+        Files.write(result.getKeyPair().getKeyMaterial(), new File(privateKeyPath), Charsets.UTF_8);
     }
 
     private void deleteKeyPairIfExists(String keyName) {
@@ -439,8 +435,7 @@ public class Ec2Service {
     }
 
     public void putUserPolicy(String username, String userPolicyResourcePath) throws IOException {
-        String policyDocument =
-                IOUtils.toString(Ec2Service.class.getResourceAsStream(userPolicyResourcePath));
+        String policyDocument = Resources.toString(Resources.getResource(userPolicyResourcePath), Charsets.UTF_8);
         PutUserPolicyRequest x = new PutUserPolicyRequest(username, username, policyDocument);
         iam.putUserPolicy(x);
     }

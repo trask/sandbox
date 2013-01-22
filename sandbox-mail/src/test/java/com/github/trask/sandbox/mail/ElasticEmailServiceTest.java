@@ -20,12 +20,12 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Future;
 
 import javax.mail.MessagingException;
 
-import org.apache.commons.lang.math.RandomUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +70,7 @@ public class ElasticEmailServiceTest {
     @Test
     public void shouldSendEmail() throws Exception {
         // given
-        final long random = RandomUtils.nextLong();
+        final long random = new Random().nextLong();
         String from = "unit.test.from@example.com";
         String to = "unit.test.to@example.com";
         String subject = getClass().getSimpleName();

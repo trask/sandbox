@@ -35,16 +35,16 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 
 import com.google.common.base.Charsets;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 /**
  * @author Trask Stalnaker
  */
 public class MockHttpHandler implements HttpHandler {
 
-    private final Cache<String, Queue<HttpResponse>> responseQueue =
+    private final LoadingCache<String, Queue<HttpResponse>> responseQueue =
             CacheBuilder.newBuilder().build(new CacheLoader<String, Queue<HttpResponse>>() {
                 @Override
                 public Queue<HttpResponse> load(String input) {
@@ -52,7 +52,7 @@ public class MockHttpHandler implements HttpHandler {
                 }
             });
 
-    private final Cache<String, BlockingQueue<HttpResponse>> responseBlockingQueue =
+    private final LoadingCache<String, BlockingQueue<HttpResponse>> responseBlockingQueue =
             CacheBuilder.newBuilder().build(new CacheLoader<String, BlockingQueue<HttpResponse>>() {
                 @Override
                 public BlockingQueue<HttpResponse> load(String input) {

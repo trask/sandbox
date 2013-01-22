@@ -17,7 +17,6 @@ package com.github.trask.sandbox.commandq;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,7 @@ import com.google.code.morphia.Key;
 import com.google.code.morphia.query.Query;
 import com.google.code.morphia.query.UpdateOperations;
 import com.google.code.morphia.query.UpdateResults;
+import com.google.common.base.Strings;
 import com.mongodb.WriteResult;
 
 /**
@@ -67,7 +67,7 @@ public class QueuedCommandDao extends BasicDao {
         WriteResult result = getDatastore().delete(updateQuery);
         // hopefully morphia WriteResult will introduce getHadError() like for UpdateResult
         String error = result.getError();
-        if (!StringUtils.isEmpty(error)) {
+        if (!Strings.isNullOrEmpty(error)) {
             logger.error("deleteQueuedCommandOnSuccess(): delete error: {}", result.getError());
             // TODO what's the best fallback, if anything?
         }

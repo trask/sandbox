@@ -32,7 +32,7 @@
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>
-      <version>2.7.2</version>
+      <version>2.10.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.morphia</groupId>
@@ -48,7 +48,7 @@
       <!-- override the version of the transitive dependency from morphia-logging-slf4j -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.4</version>
+      <version>1.7.2</version>
     </dependency>
   </dependencies>
 

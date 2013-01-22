@@ -16,12 +16,12 @@
 package com.github.trask.sandbox.isolation;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.io.Resources;
+import com.google.common.reflect.Reflection;
 
 /**
  * @author Trask Stalnaker
@@ -51,18 +51,18 @@ class ClassLoaderExtension {
             return bridgeInterface;
         }
         String resourceName = name.replace('.', '/') + ".class";
-        InputStream input = extensibleClassLoader.getResourceAsStream(resourceName);
-        if (input == null) {
+        URL url = extensibleClassLoader.getResource(resourceName);
+        if (url == null) {
             throw new ClassNotFoundException(name);
         }
         byte[] b;
         try {
-            b = IOUtils.toByteArray(input);
+            b = Resources.toByteArray(url);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
         if (name.indexOf('.') != -1) {
-            String packageName = StringUtils.substringBeforeLast(name, ".");
+            String packageName = Reflection.getPackageName(name);
             extensibleClassLoader.createPackageIfNecessary(packageName);
         }
         try {

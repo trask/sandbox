@@ -16,14 +16,14 @@
 package com.github.trask.sandbox.isolation;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 
 /**
  * @author Trask Stalnaker
  */
 interface ExtensibleClassLoader {
 
-    InputStream getResourceAsStream(String name);
+    URL getResource(String name);
     void createPackageIfNecessary(String packageName);
     Class<?> defineClass(String name, byte[] b) throws IOException;
 }

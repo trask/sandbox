@@ -17,10 +17,10 @@ package com.github.trask.sandbox.sshj;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 
 import net.schmizz.sshj.SSHClient;
@@ -28,13 +28,13 @@ import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.xfer.LocalDestFile;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.TeeOutputStream;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 
 /**
  * @author Trask Stalnaker
@@ -56,7 +56,7 @@ public class SshSession {
             session.allocateDefaultPTY();
             Command cmd = session.exec(command);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            IOUtils.copy(cmd.getInputStream(), new TeeOutputStream(out, new LoggingOutputStream()));
+            ByteStreams.copy(cmd.getInputStream(), new TeeOutputStream(new LoggingOutputStream()));
             return new String(out.toByteArray(), Charsets.UTF_8.name());
         } finally {
             session.close();
@@ -71,7 +71,7 @@ public class SshSession {
         try {
             session.allocateDefaultPTY();
             Command cmd = session.exec(command);
-            IOUtils.copy(cmd.getInputStream(), new LoggingOutputStream());
+            ByteStreams.copy(cmd.getInputStream(), new LoggingOutputStream());
         } finally {
             session.close();
         }
@@ -80,8 +80,8 @@ public class SshSession {
     // looks for resource first on classpath and then in filesystem
     public void scp(String resource) throws IOException, NoSuchAlgorithmException {
         logger.debug("scp(\"{}\")", resource);
-        InputStream in = SshSession.class.getClassLoader().getResourceAsStream(resource);
-        if (in == null) {
+        URL url = Resources.getResource(resource);
+        if (url == null) {
             File file = new File(resource);
             if (file.exists()) {
                 client.newSCPFileTransfer().upload(file.getPath(), file.getName());
@@ -90,10 +90,10 @@ public class SshSession {
             }
         } else {
             File tempFile = File.createTempFile("scp", ".tmp");
-            IOUtils.copy(in, new FileOutputStream(tempFile));
+            Resources.asByteSource(url).copyTo(Files.asByteSink(tempFile));
             String fileName = resource;
             if (fileName.contains("/")) {
-                fileName = StringUtils.substringAfterLast(fileName, "/");
+                fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
             }
             client.newSCPFileTransfer().upload(tempFile.getPath(), fileName);
         }
@@ -140,7 +140,7 @@ public class SshSession {
             // method from LocalDestFile interface that is not needed here
         }
     }
-
+    
     private static class LoggingOutputStream extends OutputStream {
         private final ByteArrayOutputStream holder = new ByteArrayOutputStream();
         private volatile boolean closed = false;
@@ -165,5 +165,16 @@ public class SshSession {
             logger.debug(holder.toString().trim());
             holder.reset();
         }
+    }
+    
+    private static class TeeOutputStream extends FilterOutputStream {
+		public TeeOutputStream(OutputStream delegate) {
+			super(delegate);
+		}
+		@Override
+		public void write(int b) throws IOException {
+			System.out.write(b);
+			super.write(b);
+		}
     }
 }
