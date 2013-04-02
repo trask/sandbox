@@ -62,6 +62,7 @@
     <!--module>sandbox-saucelabs</module -->
     <module>sandbox-ssh</module>
     <module>sandbox-testutils</module>
+    <module>sandbox-thread-locals</module>
   </modules>
 
   <scm>
